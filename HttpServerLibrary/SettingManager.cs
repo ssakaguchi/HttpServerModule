@@ -2,7 +2,7 @@
 
 namespace HttpServerLibrary
 {
-    internal class SettingReader
+    internal class SettingManager
     {
         private static ConfigData? _configData;
         public static ConfigData GetConfigData()
@@ -36,6 +36,6 @@ namespace HttpServerLibrary
         public string Path { get; set; } = string.Empty;
 
         [JsonProperty("timeout_seconds")]
-        public int TimeoutSeconds { get; set; } = 20;
+        public int TimeoutSeconds { get; set; } = 100;
     }
 }

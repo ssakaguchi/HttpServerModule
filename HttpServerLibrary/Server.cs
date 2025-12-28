@@ -10,6 +10,7 @@ namespace HttpServerLibrary
 
         private HttpListener _listener = new HttpListener();
 
+        /// <summary> コンストラクタ </summary>
         private Server()
         {
         }
@@ -19,7 +20,11 @@ namespace HttpServerLibrary
         {
             try
             {
-                _listener.Prefixes.Add("http://localhost:8080/api/v1/resource/");
+                ConfigData config = SettingManager.GetConfigData();
+                string prefix = $"http://{config.Host}:{config.Port}/{config.Path}/";
+
+                _listener.Prefixes.Add(prefix);
+
                 // HTTPサーバーを起動する
                 _listener.Start();
 
@@ -35,6 +40,7 @@ namespace HttpServerLibrary
             }
         }
 
+        /// <summary> APIサービスを停止する </summary>
         public void Stop()
         {
             if (_listener != null && _listener.IsListening)
@@ -44,18 +50,18 @@ namespace HttpServerLibrary
             }
         }
 
-
+        /// <summary> リクエスト受信時の処理 </summary>
         private void OnRequestReceived(IAsyncResult result)
         {
             if (result.AsyncState is not HttpListener listener) return;
             if (!listener.IsListening) { return; }
 
-            HttpListenerContext context = listener.EndGetContext(result);
-            HttpListenerRequest request = context.Request;
-            HttpListenerResponse response = context.Response;
-
             try
             {
+                HttpListenerContext context = listener.EndGetContext(result);
+                HttpListenerRequest request = context.Request;
+                HttpListenerResponse response = context.Response;
+
                 response.StatusCode = (int)HttpStatusCode.OK;
                 response.ContentType = "application/json";
                 response.ContentEncoding = Encoding.UTF8;
