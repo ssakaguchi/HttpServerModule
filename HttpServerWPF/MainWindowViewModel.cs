@@ -1,4 +1,5 @@
 ﻿using HttpServerService;
+using LoggerService;
 using Reactive.Bindings;
 using Reactive.Bindings.Disposables;
 using Reactive.Bindings.Extensions;
@@ -21,6 +22,19 @@ namespace HttpServerWPF
         public ReactiveCommand StopCommand { get; } = new ReactiveCommand();
         public ReactiveCommand ClearMessageCommand { get; } = new ReactiveCommand();
 
+        private static class CommunicationLog
+        {
+            public const string Directory = @"logs";
+            public const string FilePath = @"Communication.log";
+        }
+
+        private readonly CompositeDisposable _disposables = new();
+
+        private readonly ILog4netAdapter _logger =
+            Log4netAdapterFactory.Create(logDirectoryName: CommunicationLog.Directory, logFileName: CommunicationLog.FilePath);
+
+        private readonly ILogFileWatcher _logFileWatcher =
+            LogFileWatcherFactory.Create(logDirectoryName: CommunicationLog.Directory, logFileName: CommunicationLog.FilePath);
 
         public MainWindowViewModel()
         {
@@ -30,8 +44,8 @@ namespace HttpServerWPF
             LoadedCommand.Subscribe(this.OnLoaded).AddTo(_disposables);
             ClearMessageCommand.Subscribe(this.ClearMessage).AddTo(_disposables);
 
-            //// 通信履歴ファイルの監視を開始
-            //_logFileWatcher.FileChanged += OnLogFileChanged;
+            // 通信履歴ファイルの監視を開始
+            _logFileWatcher.FileChanged += OnLogFileChanged;
         }
 
         private void OnLoaded()
@@ -47,7 +61,7 @@ namespace HttpServerWPF
             }
             catch (Exception e)
             {
-                //_logger.Error("Loadに失敗しました。", e);
+                _logger.Error("Loadに失敗しました。", e);
                 StatusMessage.Value = "Loadに失敗しました。";
             }
         }
@@ -69,19 +83,27 @@ namespace HttpServerWPF
             }
             catch (Exception e)
             {
-                //_logger.Error("設定の保存に失敗しました。", e);
+                _logger.Error("設定の保存に失敗しました。", e);
                 StatusMessage.Value = "設定の保存に失敗しました。";
             }
         }
 
-        private void OnStartButtonClicked() => Server.Instance.Start();
+        private void OnStartButtonClicked()
+        {
+            Server.Instance.Start();
+            _logger.Info("サーバーを開始しました");
+        }
 
-        private void OnStopButtonClicked() => Server.Instance.Stop();
+        private void OnStopButtonClicked()
+        {
+            Server.Instance.Stop();
+            _logger.Info("サーバーを停止しました");
+        }
+
+        private void OnLogFileChanged(object? sender, string content) => LogText.Value = content;
 
         private void ClearMessage() => StatusMessage.Value = string.Empty;
 
-
-        private readonly CompositeDisposable _disposables = new();
         public void Dispose()
         {
             _disposables.Dispose();

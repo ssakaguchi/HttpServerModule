@@ -1,0 +1,99 @@
+﻿using log4net;
+using log4net.Appender;
+using log4net.Core;
+using log4net.Layout;
+using log4net.Repository.Hierarchy;
+
+namespace LoggerService
+{
+    internal sealed class Log4netAdapter : ILog4netAdapter
+    {
+        private ILog Logger { get; } = LogManager.GetLogger(typeof(Log4netAdapter));
+
+        private static Log4netAdapter? _instance;
+
+        /// <summary>インスタンス</summary>
+        public static Log4netAdapter Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new Log4netAdapter();
+                }
+                return _instance;
+            }
+        }
+
+        private Log4netAdapter()
+        {
+        }
+
+        internal static void Initialize(string logDirectoryName, string logFileName)
+        {
+            var hierarchy = (Hierarchy)LogManager.GetRepository();
+
+            // 既に追加済みなら何もしない
+            if (hierarchy.Root.Appenders.Cast<IAppender>()
+                .Any(a => a.Name == "RollingFileAppender"))
+            {
+                return;
+            }
+
+            // ログディレクトリ作成
+            var logDir = Path.Combine(AppContext.BaseDirectory, logDirectoryName);
+            Directory.CreateDirectory(logDir);
+
+            // レイアウト
+            var layout = new PatternLayout
+            {
+                ConversionPattern = "%date - %message%newline"
+            };
+            layout.ActivateOptions();
+
+            // RollingFileAppender
+            var appender = new RollingFileAppender
+            {
+                Name = "RollingFileAppender",
+                File = Path.Combine(logDir, logFileName),
+                AppendToFile = true,
+                RollingStyle = RollingFileAppender.RollingMode.Size,
+                MaximumFileSize = "10MB",
+                MaxSizeRollBackups = 3,
+                StaticLogFileName = true,
+                LockingModel = new FileAppender.MinimalLock(),
+                Layout = layout
+            };
+            appender.ActivateOptions();
+
+            // Root logger 設定
+            hierarchy.Root.Level = Level.All;
+            hierarchy.Root.AddAppender(appender);
+            hierarchy.Configured = true;
+        }
+
+        public void Info(string message) => Logger.Info(message);
+
+        public void Error(string message) => Logger.Error(message);
+
+        public void Error(string message, Exception ex) => Logger.Error(message, ex);
+    }
+
+    public static class Log4netAdapterFactory
+    {
+        public static ILog4netAdapter Create(string logDirectoryName, string logFileName)
+        {
+            Log4netAdapter.Initialize(logDirectoryName, logFileName);
+            return Log4netAdapter.Instance;
+        }
+    }
+
+    public interface ILog4netAdapter
+    {
+        public void Info(string message);
+
+        public void Error(string message);
+
+        public void Error(string message, Exception ex);
+    }
+}
