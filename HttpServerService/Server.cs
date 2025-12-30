@@ -9,6 +9,8 @@ namespace HttpServerService
         public static Server Instance => _instance;
 
         private HttpListener _listener = new HttpListener();
+        private readonly object _sync = new();
+        private bool _isStopping;
 
         /// <summary> コンストラクタ </summary>
         private Server()
@@ -20,18 +22,21 @@ namespace HttpServerService
         {
             try
             {
-                ConfigData config = SettingManager.GetConfigData();
-                string prefix = $"http://{config.Host}:{config.Port}/{config.Path}/";
-
-                _listener.Prefixes.Add(prefix);
-
-                // HTTPサーバーを起動する
-                _listener.Start();
-
-                while (_listener.IsListening)
+                lock (_sync)
                 {
-                    var result = _listener.BeginGetContext(OnRequestReceived, _listener);
-                    result.AsyncWaitHandle.WaitOne();
+                    if (_listener.IsListening) return;
+
+                    _isStopping = false;
+
+                    ConfigData config = SettingManager.GetConfigData();
+                    string prefix = $"http://{config.Host}:{config.Port}/{config.Path}/";
+
+                    _listener = new HttpListener();
+                    _listener.Prefixes.Add(prefix);
+
+                    // HTTPサーバーを起動する
+                    _listener.Start();
+                    _listener.BeginGetContext(OnRequestReceived, _listener);
                 }
             }
             catch (Exception)
@@ -43,10 +48,27 @@ namespace HttpServerService
         /// <summary> APIサービスを停止する </summary>
         public void Stop()
         {
-            if (_listener != null && _listener.IsListening)
+            lock (_sync)
             {
-                _listener.Stop();
-                _listener.Close();
+                if (_listener == null)
+                {
+                    return;
+                }
+
+                _isStopping = true;
+
+                try
+                {
+                    if (_listener.IsListening)
+                    {
+                        _listener.Stop();
+                    }
+                    _listener.Close();
+                }
+                finally
+                {
+                    _listener = new HttpListener();
+                }
             }
         }
 
@@ -55,13 +77,24 @@ namespace HttpServerService
         {
             // リスナーの状態確認
             if (result.AsyncState is not HttpListener listener) return;
-            if (!listener.IsListening) { return; }
+
+            // 停止中でなければ次の受信待ちを予約
+            try
+            {
+                if (listener.IsListening && !_isStopping)
+                {
+                    listener.BeginGetContext(OnRequestReceived, listener);
+                }
+            }
+            catch (ObjectDisposedException) { return; }
+            catch (HttpListenerException) { return; }
 
             try
             {
+                if (!listener.IsListening) return;
+
                 // リクエストコンテキストの取得
                 HttpListenerContext context = listener.EndGetContext(result);
-                HttpListenerRequest request = context.Request;
                 HttpListenerResponse response = context.Response;
 
                 // レスポンスの設定
@@ -74,12 +107,26 @@ namespace HttpServerService
 
                 // レスポンスの書き込み
                 response.ContentLength64 = buffer.Length;
-                response.OutputStream.Write(buffer, 0, buffer.Length);
-                using var writer = new StreamWriter(response.OutputStream, Encoding.UTF8);
+
+                using (response.OutputStream)
+                {
+                    response.OutputStream.Write(buffer, 0, buffer.Length);
+                }
+            }
+            catch (ObjectDisposedException)
+            {
+                // Stop/Closeによる終了
+                return;
+            }
+            catch (HttpListenerException)
+            {
+                // Stopによる中断
+                return;
             }
             catch (Exception)
             {
-                throw;
+                // todo:ログ出力実装する
+                return;
             }
         }
 
