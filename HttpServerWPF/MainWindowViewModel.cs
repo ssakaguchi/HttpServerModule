@@ -74,15 +74,9 @@ namespace HttpServerWPF
             }
         }
 
-        private void OnStartButtonClicked()
-        {
-            Server.Instance.Start();
-        }
+        private void OnStartButtonClicked() => Server.Instance.Start();
 
-        private void OnStopButtonClicked()
-        {
-            Server.Instance.Stop();
-        }
+        private void OnStopButtonClicked() => Server.Instance.Stop();
 
         private void ClearMessage() => StatusMessage.Value = string.Empty;
 
