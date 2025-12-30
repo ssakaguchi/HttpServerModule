@@ -13,4 +13,8 @@
     <PackageReference Include="ReactiveProperty" Version="9.8.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\HttpServerService\HttpServerService.csproj" />
+  </ItemGroup>
+
 </Project>
