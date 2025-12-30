@@ -8,6 +8,7 @@
         prism:ViewModelLocator.AutoWireViewModel="True"
         WindowStartupLocation="CenterScreen"
         mc:Ignorable="d"
+        Background="LightYellow"
         Loaded= "Window_Loaded"
         Title="HttpServer" Height="330" Width="600" ResizeMode="NoResize">
     <i:Interaction.Triggers>
