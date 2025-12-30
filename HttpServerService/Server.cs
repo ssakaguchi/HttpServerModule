@@ -130,14 +130,8 @@ namespace HttpServerService
                 using (var reader = new StreamReader(context.Request.InputStream, encoding))
                 {
                     var body = await reader.ReadToEndAsync();
-                    if (body != string.Empty)
-                    {
-                        _logger.Info($"    {body}");
-                    }
-                    else
-                    {
-                        _logger.Info($"    なし");
-                    }
+                    body = string.IsNullOrEmpty(body) ? "なし" : body;
+                    _logger.Info($"    {body}");
                 }
 
                 HttpListenerResponse response = context.Response;
@@ -170,13 +164,11 @@ namespace HttpServerService
                 // Stopによる中断
                 return false;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // todo:ログ出力実装する
+                _logger.Error($"未知の例外エラーが発生しました。", ex);
                 return false;
             }
-
-            return true;
         }
 
         /// <summary> レスポンスデータを取得する </summary>
