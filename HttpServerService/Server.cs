@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Text;
+using LoggerService;
 
 namespace HttpServerService
 {
@@ -11,6 +12,15 @@ namespace HttpServerService
         private HttpListener _listener = new HttpListener();
         private readonly object _sync = new();
         private bool _isStopping;
+
+        private static class CommunicationLog
+        {
+            public const string Directory = @"logs";
+            public const string FilePath = @"Communication.log";
+        }
+
+        private readonly ILog4netAdapter _logger =
+            Log4netAdapterFactory.Create(logDirectoryName: CommunicationLog.Directory, logFileName: CommunicationLog.FilePath);
 
         /// <summary> コンストラクタ </summary>
         private Server()
@@ -75,8 +85,13 @@ namespace HttpServerService
         /// <summary> リクエスト受信時の処理 </summary>
         private void OnRequestReceived(IAsyncResult result)
         {
+            _ = this.OnRequestReceivedAsync(result);
+        }
+
+        private async Task<bool> OnRequestReceivedAsync(IAsyncResult result)
+        {
             // リスナーの状態確認
-            if (result.AsyncState is not HttpListener listener) return;
+            if (result.AsyncState is not HttpListener listener) return false;
 
             // 停止中でなければ次の受信待ちを予約
             try
@@ -86,15 +101,45 @@ namespace HttpServerService
                     listener.BeginGetContext(OnRequestReceived, listener);
                 }
             }
-            catch (ObjectDisposedException) { return; }
-            catch (HttpListenerException) { return; }
+            catch (ObjectDisposedException) { return false; }
+            catch (HttpListenerException) { return false; }
 
             try
             {
-                if (!listener.IsListening) return;
+                if (!listener.IsListening) return false;
 
                 // リクエストコンテキストの取得
                 HttpListenerContext context = listener.EndGetContext(result);
+                HttpListenerRequest httpListenerRequest = context.Request;
+
+                _logger.Info($"要求URI:{httpListenerRequest.Url}");
+                _logger.Info($"HTTPメソッド:{httpListenerRequest.HttpMethod}");
+                _logger.Info($"受信データ:");
+                _logger.Info($"  ヘッダー部:");
+
+                foreach (var key in httpListenerRequest.Headers.AllKeys)
+                {
+                    if (key == null) continue;
+
+                    string value = httpListenerRequest.Headers[key] ?? string.Empty;
+                    _logger.Info($"    {key}:{value}");
+                }
+
+                _logger.Info($"  ボディ部:");
+                var encoding = context.Request.ContentEncoding ?? Encoding.UTF8;
+                using (var reader = new StreamReader(context.Request.InputStream, encoding))
+                {
+                    var body = await reader.ReadToEndAsync();
+                    if (body != string.Empty)
+                    {
+                        _logger.Info($"    {body}");
+                    }
+                    else
+                    {
+                        _logger.Info($"    なし");
+                    }
+                }
+
                 HttpListenerResponse response = context.Response;
 
                 // レスポンスの設定
@@ -112,22 +157,26 @@ namespace HttpServerService
                 {
                     response.OutputStream.Write(buffer, 0, buffer.Length);
                 }
+
+                return true;
             }
             catch (ObjectDisposedException)
             {
                 // Stop/Closeによる終了
-                return;
+                return false;
             }
             catch (HttpListenerException)
             {
                 // Stopによる中断
-                return;
+                return false;
             }
             catch (Exception)
             {
                 // todo:ログ出力実装する
-                return;
+                return false;
             }
+
+            return true;
         }
 
         /// <summary> レスポンスデータを取得する </summary>

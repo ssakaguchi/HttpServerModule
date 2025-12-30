@@ -11,6 +11,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\LoggerService\LoggerService.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="external_setting_file.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
