@@ -28,7 +28,7 @@ namespace HttpServerWPF
             StartCommand.Subscribe(this.OnStartButtonClicked).AddTo(_disposables);
             StopCommand.Subscribe(this.OnStopButtonClicked).AddTo(_disposables);
             LoadedCommand.Subscribe(this.OnLoaded).AddTo(_disposables);
-            //ClearMessageCommand.Subscribe(this.ClearMessage).AddTo(_disposables);
+            ClearMessageCommand.Subscribe(this.ClearMessage).AddTo(_disposables);
 
             //// 通信履歴ファイルの監視を開始
             //_logFileWatcher.FileChanged += OnLogFileChanged;
@@ -53,7 +53,25 @@ namespace HttpServerWPF
         }
         private void OnSaveButtonClicked()
         {
-            throw new NotImplementedException();
+            try
+            {
+                var configData = new ConfigData
+                {
+                    Host = this.HostName.Value,
+                    Port = this.PortNo.Value.ToString(),
+                    Path = this.Path.Value,
+                    UserId = this.UserId.Value,
+                    Password = this.Password.Value
+                };
+                ConfigManager.SaveConfigData(configData);
+
+                StatusMessage.Value = "設定を保存しました。";
+            }
+            catch (Exception e)
+            {
+                //_logger.Error("設定の保存に失敗しました。", e);
+                StatusMessage.Value = "設定の保存に失敗しました。";
+            }
         }
 
         private void OnStartButtonClicked()
@@ -65,6 +83,8 @@ namespace HttpServerWPF
         {
             Server.Instance.Stop();
         }
+
+        private void ClearMessage() => StatusMessage.Value = string.Empty;
 
 
         private readonly CompositeDisposable _disposables = new();
