@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Threading;
 
 namespace HttpServerWPF
 {
@@ -10,6 +11,14 @@ namespace HttpServerWPF
         public MainWindow()
         {
             InitializeComponent();
+
+            LogTextBox.TextChanged += (_, __) =>
+            {
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    LogTextBox.ScrollToEnd();
+                }), DispatcherPriority.Background);
+            };
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
