@@ -36,7 +36,20 @@ namespace HttpServerWPF
 
         private void OnLoaded()
         {
-            //throw new NotImplementedException();
+            try
+            {
+                ConfigData configData = ConfigManager.GetConfigData();
+                this.HostName.Value = configData.Host;
+                this.PortNo.Value = int.Parse(configData.Port);
+                this.Path.Value = configData.Path;
+                this.UserId.Value = configData.UserId;
+                this.Password.Value = configData.Password;
+            }
+            catch (Exception e)
+            {
+                //_logger.Error("Loadに失敗しました。", e);
+                StatusMessage.Value = "Loadに失敗しました。";
+            }
         }
         private void OnSaveButtonClicked()
         {

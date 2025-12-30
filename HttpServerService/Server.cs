@@ -28,7 +28,7 @@ namespace HttpServerService
 
                     _isStopping = false;
 
-                    ConfigData config = SettingManager.GetConfigData();
+                    ConfigData config = ConfigManager.GetConfigData();
                     string prefix = $"http://{config.Host}:{config.Port}/{config.Path}/";
 
                     _listener = new HttpListener();

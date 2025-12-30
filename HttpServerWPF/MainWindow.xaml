@@ -48,12 +48,12 @@
             <GroupBox Margin="10,0,10,0" Header="Login information" FontSize="20">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="UserID:" FontSize="16" Width="80" Margin="0,5,0,0" />
-                        <TextBox Text="{Binding UserID.Value}" FontSize="16" Margin="10,5,0,0" Width="140" TextAlignment="Right"/>
+                        <TextBlock Text="UserId:" FontSize="16" Width="80" Margin="0,5,0,0" />
+                        <TextBox Text="{Binding UserId.Value}" FontSize="16" Margin="10,5,0,0" Width="140"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Password:" FontSize="16" Width="80" Margin="0,5,0,0" />
-                        <TextBox Text="{Binding Password.Value}" FontSize="16" Margin="10,5,0,0" Width="140" TextAlignment="Right"/>
+                        <TextBox Text="{Binding Password.Value}" FontSize="16" Margin="10,5,0,0" Width="140"/>
                     </StackPanel>
                 </StackPanel>
             </GroupBox>

@@ -2,7 +2,7 @@
 
 namespace HttpServerService
 {
-    internal class SettingManager
+    public class ConfigManager
     {
         private static ConfigData? _configData;
         public static ConfigData GetConfigData()
@@ -21,6 +21,14 @@ namespace HttpServerService
 
             return _configData;
         }
+
+        public static void SaveConfigData(ConfigData configData)
+        {
+            string filePath = "external_setting_file.json";
+            string jsonText = JsonConvert.SerializeObject(configData, Formatting.Indented);
+            File.WriteAllText(filePath, jsonText);
+            _configData = configData;
+        }
     }
 
 
@@ -35,7 +43,10 @@ namespace HttpServerService
         [JsonProperty("path")]
         public string Path { get; set; } = string.Empty;
 
-        [JsonProperty("timeout_seconds")]
-        public int TimeoutSeconds { get; set; } = 100;
+        [JsonProperty("user_id")]
+        public string UserId { get; set; } = string.Empty;
+
+        [JsonProperty("password")]
+        public string Password { get; set; } = string.Empty;
     }
 }
