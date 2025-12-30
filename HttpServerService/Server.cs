@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using System.Text;
 
-namespace HttpServerLibrary
+namespace HttpServerService
 {
     public class Server
     {

@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\HttpServerLibrary\HttpServerLibrary.csproj" />
+    <ProjectReference Include="..\HttpServerService\HttpServerService.csproj" />
   </ItemGroup>
 
 </Project>

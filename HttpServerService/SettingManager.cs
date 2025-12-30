@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace HttpServerLibrary
+namespace HttpServerService
 {
     internal class SettingManager
     {
