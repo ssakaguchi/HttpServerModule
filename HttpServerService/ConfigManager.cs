@@ -43,8 +43,8 @@ namespace HttpServerService
         [JsonProperty("path")]
         public string Path { get; set; } = string.Empty;
 
-        [JsonProperty("user_id")]
-        public string UserId { get; set; } = string.Empty;
+        [JsonProperty("user")]
+        public string User { get; set; } = string.Empty;
 
         [JsonProperty("password")]
         public string Password { get; set; } = string.Empty;

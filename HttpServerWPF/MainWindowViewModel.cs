@@ -11,7 +11,7 @@ namespace HttpServerWPF
         public ReactiveProperty<string> HostName { get; } = new ReactiveProperty<string>(string.Empty);
         public ReactiveProperty<int> PortNo { get; } = new ReactiveProperty<int>(0);
         public ReactiveProperty<string> Path { get; } = new ReactiveProperty<string>(string.Empty);
-        public ReactiveProperty<string> UserId { get; } = new ReactiveProperty<string>(string.Empty);
+        public ReactiveProperty<string> User { get; } = new ReactiveProperty<string>(string.Empty);
         public ReactiveProperty<string> Password { get; } = new ReactiveProperty<string>(string.Empty);
         public ReactiveProperty<string> LogText { get; } = new ReactiveProperty<string>(string.Empty);
         public ReactiveProperty<string> StatusMessage { get; } = new ReactiveProperty<string>(string.Empty);
@@ -56,7 +56,7 @@ namespace HttpServerWPF
                 this.HostName.Value = configData.Host;
                 this.PortNo.Value = int.Parse(configData.Port);
                 this.Path.Value = configData.Path;
-                this.UserId.Value = configData.UserId;
+                this.User.Value = configData.User;
                 this.Password.Value = configData.Password;
             }
             catch (Exception e)
@@ -74,7 +74,7 @@ namespace HttpServerWPF
                     Host = this.HostName.Value,
                     Port = this.PortNo.Value.ToString(),
                     Path = this.Path.Value,
-                    UserId = this.UserId.Value,
+                    User = this.User.Value,
                     Password = this.Password.Value
                 };
                 ConfigManager.SaveConfigData(configData);

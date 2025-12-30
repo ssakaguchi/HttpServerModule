@@ -2,6 +2,6 @@
   "host_name": "localhost",
   "port_no": 8080,
   "path": "api/v1/resource",
-  "user_id": "user",
+  "user": "user",
   "password": "pass"
 }
