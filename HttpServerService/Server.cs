@@ -34,7 +34,11 @@ namespace HttpServerService
             {
                 lock (_sync)
                 {
-                    if (_listener.IsListening) return;
+                    if (_listener.IsListening)
+                    {
+                        _logger.Info("既にサーバーを開始済です");
+                        return;
+                    }
 
                     _isStopping = false;
 
@@ -67,6 +71,9 @@ namespace HttpServerService
                     // HTTPサーバーを起動する
                     _listener.Start();
                     _listener.BeginGetContext(OnRequestReceived, _listener);
+
+                    _logger.Info("サーバーを開始しました");
+
                 }
             }
             catch (Exception)
@@ -98,6 +105,8 @@ namespace HttpServerService
                 }
                 finally
                 {
+                    _logger.Info("サーバーを停止しました");
+
                     _listener = new HttpListener();
                 }
             }

@@ -49,7 +49,7 @@ namespace HttpServerWPF
             _logFileWatcher.FileChanged += OnLogFileChanged;
         }
 
-        private void OnLoaded()
+        private async void OnLoaded()
         {
             try
             {
@@ -61,7 +61,7 @@ namespace HttpServerWPF
                 this.UseBasicAuth.Value = configData.UseBasicAuth;
                 this.Password.Value = configData.Password;
 
-                LogText.Value = _logger.ReadLogFileContent();
+                this.LogText.Value = await _logFileWatcher.ReadLogFileContentAsync();
 
             }
             catch (Exception e)
@@ -70,6 +70,7 @@ namespace HttpServerWPF
                 StatusMessage.Value = "Loadに失敗しました。";
             }
         }
+
         private void OnSaveButtonClicked()
         {
             try
@@ -94,17 +95,9 @@ namespace HttpServerWPF
             }
         }
 
-        private void OnStartButtonClicked()
-        {
-            Server.Instance.Start();
-            _logger.Info("サーバーを開始しました");
-        }
+        private void OnStartButtonClicked() => Server.Instance.Start();
 
-        private void OnStopButtonClicked()
-        {
-            Server.Instance.Stop();
-            _logger.Info("サーバーを停止しました");
-        }
+        private void OnStopButtonClicked() => Server.Instance.Stop();
 
         private void OnLogFileChanged(object? sender, string content) => LogText.Value = content;
 

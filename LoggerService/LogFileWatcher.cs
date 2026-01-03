@@ -35,6 +35,9 @@ namespace LoggerService
         public void Start() => _fileWatcher.EnableRaisingEvents = true;          // 監視を開始
         public void Stop() => _fileWatcher.EnableRaisingEvents = false;          // 監視を停止
 
+        /// <summary>ログファイルの内容を非同期で取得する</summary>
+        public async Task<string> ReadLogFileContentAsync() => await ReadFileWithRetryAsync(_logFilePath);
+
         /// <summary>ファイル変更時処理</summary>
         private async void OnFileChanged(object sender, FileSystemEventArgs e)
         {
@@ -102,6 +105,8 @@ namespace LoggerService
         public void Start();
 
         public void Stop();
+
+        Task<string> ReadLogFileContentAsync();
 
         void Dispose();
     }
