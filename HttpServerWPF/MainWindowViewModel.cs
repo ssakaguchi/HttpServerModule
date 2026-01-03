@@ -95,9 +95,17 @@ namespace HttpServerWPF
             }
         }
 
-        private void OnStartButtonClicked() => Server.Instance.Start();
+        private void OnStartButtonClicked()
+        {
+            _logger.Info("サーバーを開始します");
+            Server.Instance.Start();
+        }
 
-        private void OnStopButtonClicked() => Server.Instance.Stop();
+        private void OnStopButtonClicked()
+        {
+            _logger.Info("サーバーを停止します");
+            Server.Instance.Stop();
+        }
 
         private void OnLogFileChanged(object? sender, string content) => LogText.Value = content;
 
