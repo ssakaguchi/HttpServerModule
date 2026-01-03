@@ -46,7 +46,7 @@ namespace HttpServerService
                     _listener = new HttpListener();
 
                     // 認証設定
-                    if (config.UseBasicAuth)
+                    if (config.AuthenticationMethod.Equals("Basic"))
                     {
                         _listener.AuthenticationSchemes = AuthenticationSchemes.Basic;
 
@@ -139,7 +139,7 @@ namespace HttpServerService
                 HttpListenerRequest httpListenerRequest = context.Request;
 
                 ConfigData config = ConfigManager.GetConfigData();
-                if (config.UseBasicAuth)
+                if (config.AuthenticationMethod.Equals("Basic"))
                 {
                     bool ok = TryValidateBasicAuth(httpListenerRequest, config.User, config.Password);
                     if (!ok)

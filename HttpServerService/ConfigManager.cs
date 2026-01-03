@@ -43,8 +43,8 @@ namespace HttpServerService
         [JsonProperty("path")]
         public string Path { get; set; } = string.Empty;
 
-        [JsonProperty("use_basic_auth")]
-        public bool UseBasicAuth { get; set; }
+        [JsonProperty("authentication_method")]
+        public string AuthenticationMethod { get; set; } = string.Empty;
 
         [JsonProperty("user")]
         public string User { get; set; } = string.Empty;
