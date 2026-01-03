@@ -39,10 +39,30 @@ namespace HttpServerService
                     _isStopping = false;
 
                     ConfigData config = ConfigManager.GetConfigData();
-                    string prefix = $"http://{config.Host}:{config.Port}/{config.Path}/";
 
                     _listener = new HttpListener();
-                    _listener.Prefixes.Add(prefix);
+
+                    // 認証設定
+                    if (config.UseBasicAuth)
+                    {
+                        _listener.AuthenticationSchemes = AuthenticationSchemes.Basic;
+
+                        _logger.Info("  認証方法：Basic認証");
+                        _logger.Info($"  アカウント認証 ");
+                        _logger.Info($"    ユーザー名：{config.User}");
+                        _logger.Info($"    パスワード：{config.Password}");
+                    }
+                    else
+                    {
+                        _listener.AuthenticationSchemes = AuthenticationSchemes.Anonymous;
+                        _logger.Info("  認証方法：匿名認証");
+                    }
+
+                    // uriPrefixの設定
+                    string uriPrefix = $"http://{config.Host}:{config.Port}/{config.Path}/";
+                    _logger.Info($"  URI：{uriPrefix}");
+
+                    _listener.Prefixes.Add(uriPrefix);
 
                     // HTTPサーバーを起動する
                     _listener.Start();
@@ -54,6 +74,7 @@ namespace HttpServerService
                 throw;
             }
         }
+
 
         /// <summary> APIサービスを停止する </summary>
         public void Stop()
@@ -111,6 +132,19 @@ namespace HttpServerService
                 // リクエストコンテキストの取得
                 HttpListenerContext context = listener.EndGetContext(result);
                 HttpListenerRequest httpListenerRequest = context.Request;
+
+                ConfigData config = ConfigManager.GetConfigData();
+                if (config.UseBasicAuth)
+                {
+                    bool ok = TryValidateBasicAuth(httpListenerRequest, config.User, config.Password);
+                    if (!ok)
+                    {
+                        _logger.Error("Basic認証に失敗しました。");
+                        await WriteUnauthorizedAsync(context.Response, realm: "HttpServerService");
+                        return true;
+                    }
+                    _logger.Error("Basic認証に成功しました。");
+                }
 
                 _logger.Info($"要求URI:{httpListenerRequest.Url}");
                 _logger.Info($"HTTPメソッド:{httpListenerRequest.HttpMethod}");
@@ -183,6 +217,56 @@ namespace HttpServerService
             {
                 return Encoding.UTF8.GetBytes("{\"error\":\"response.json file not found.\"}");
             }
+        }
+
+
+
+        private bool TryValidateBasicAuth(HttpListenerRequest request, string expectedUser, string expectedPassword)
+        {
+            // Authorization: Basic base64(user:pass)
+            string? auth = request.Headers["Authorization"];
+
+            if (string.IsNullOrWhiteSpace(auth)) return false;
+
+            if (!auth.StartsWith("Basic ", StringComparison.OrdinalIgnoreCase)) return false;
+
+            string encoded = auth.Substring("Basic ".Length).Trim();
+            byte[] decodedBytes;
+
+            try
+            {
+                decodedBytes = Convert.FromBase64String(encoded);
+
+                string decoded = Encoding.UTF8.GetString(decodedBytes);
+
+                int idx = decoded.IndexOf(':');
+                if (idx <= 0) return false;
+
+                string user = decoded.Substring(0, idx);
+                string pass = decoded.Substring(idx + 1);
+
+
+                return user == expectedUser && pass == expectedPassword;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private async Task WriteUnauthorizedAsync(HttpListenerResponse response, string realm)
+        {
+            response.StatusCode = (int)HttpStatusCode.Unauthorized;
+            response.ContentType = "application/json";
+            response.ContentEncoding = Encoding.UTF8;
+
+            // WWW-Authenticateヘッダーを追加
+            response.AddHeader("WWW-Authenticate", $"Basic realm=\"{realm}\", charset=\"UTF-8\"");
+
+            byte[] body = Encoding.UTF8.GetBytes("{\"error\":\"Unauthorized\"}");
+            response.ContentLength64 = body.Length;
+            await response.OutputStream.WriteAsync(body, 0, body.Length);
+            response.OutputStream.Close();
         }
     }
 }

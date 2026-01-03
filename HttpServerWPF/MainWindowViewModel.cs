@@ -11,6 +11,7 @@ namespace HttpServerWPF
         public ReactiveProperty<string> HostName { get; } = new ReactiveProperty<string>(string.Empty);
         public ReactiveProperty<int> PortNo { get; } = new ReactiveProperty<int>(0);
         public ReactiveProperty<string> Path { get; } = new ReactiveProperty<string>(string.Empty);
+        public ReactiveProperty<bool> UseBasicAuth { get; } = new ReactiveProperty<bool>(false);
         public ReactiveProperty<string> User { get; } = new ReactiveProperty<string>(string.Empty);
         public ReactiveProperty<string> Password { get; } = new ReactiveProperty<string>(string.Empty);
         public ReactiveProperty<string> LogText { get; } = new ReactiveProperty<string>(string.Empty);
@@ -57,7 +58,11 @@ namespace HttpServerWPF
                 this.PortNo.Value = int.Parse(configData.Port);
                 this.Path.Value = configData.Path;
                 this.User.Value = configData.User;
+                this.UseBasicAuth.Value = configData.UseBasicAuth;
                 this.Password.Value = configData.Password;
+
+                LogText.Value = _logger.ReadLogFileContent();
+
             }
             catch (Exception e)
             {
@@ -74,6 +79,7 @@ namespace HttpServerWPF
                     Host = this.HostName.Value,
                     Port = this.PortNo.Value.ToString(),
                     Path = this.Path.Value,
+                    UseBasicAuth = this.UseBasicAuth.Value,
                     User = this.User.Value,
                     Password = this.Password.Value
                 };
