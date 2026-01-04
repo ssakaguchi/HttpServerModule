@@ -4,11 +4,8 @@ using LoggerService;
 
 namespace HttpServerService
 {
-    public class Server
+    public class Server: IServer
     {
-        private static readonly Server _instance = new();
-        public static Server Instance => _instance;
-
         private HttpListener _listener = new HttpListener();
         private readonly object _sync = new();
         private bool _isStopping;
@@ -23,7 +20,7 @@ namespace HttpServerService
             Log4netAdapterFactory.Create(logDirectoryName: CommunicationLog.Directory, logFileName: CommunicationLog.FilePath);
 
         /// <summary> コンストラクタ </summary>
-        private Server()
+        public Server()
         {
         }
 

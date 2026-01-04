@@ -39,19 +39,22 @@ namespace HttpServerWPF
 
         private readonly CompositeDisposable _disposables = new();
 
+        private readonly IServer _server;
+
         private readonly ILog4netAdapter _logger =
             Log4netAdapterFactory.Create(logDirectoryName: CommunicationLog.Directory, logFileName: CommunicationLog.FilePath);
 
         private readonly ILogFileWatcher _logFileWatcher =
             LogFileWatcherFactory.Create(logDirectoryName: CommunicationLog.Directory, logFileName: CommunicationLog.FilePath);
 
-        public MainWindowViewModel()
+        public MainWindowViewModel(IServer server)
         {
             SaveCommand.Subscribe(this.OnSaveButtonClicked).AddTo(_disposables);
             StartCommand.Subscribe(this.OnStartButtonClicked).AddTo(_disposables);
             StopCommand.Subscribe(this.OnStopButtonClicked).AddTo(_disposables);
             LoadedCommand.Subscribe(this.OnLoaded).AddTo(_disposables);
             ClearMessageCommand.Subscribe(this.ClearMessage).AddTo(_disposables);
+            this._server = server;
 
             // 通信履歴ファイルの監視を開始
             _logFileWatcher.FileChanged += OnLogFileChanged;
@@ -115,13 +118,13 @@ namespace HttpServerWPF
         private void OnStartButtonClicked()
         {
             _logger.Info("サーバーを開始します");
-            Server.Instance.Start();
+            _server.Start();
         }
 
         private void OnStopButtonClicked()
         {
             _logger.Info("サーバーを停止します");
-            Server.Instance.Stop();
+            _server.Stop();
         }
 
         private void OnLogFileChanged(object? sender, string content) => LogText.Value = content;
