@@ -1,4 +1,5 @@
-﻿using HttpServerService;
+﻿using ConfigService;
+using HttpServerService;
 using LoggerService;
 using Reactive.Bindings;
 using Reactive.Bindings.Disposables;
@@ -35,8 +36,9 @@ namespace HttpServerWPF
         private readonly IServer _server;
         private readonly ILog4netAdapter _logger;
         private readonly ILogFileWatcher _logFileWatcher;
+        private readonly IConfigService _configService;
 
-        public MainWindowViewModel(IServer server,ILog4netAdapter log4NetAdapter, ILogFileWatcher logFileWatcher)
+        public MainWindowViewModel(IServer server,ILog4netAdapter log4NetAdapter, ILogFileWatcher logFileWatcher, IConfigService configService)
         {
             SaveCommand.Subscribe(this.OnSaveButtonClicked).AddTo(_disposables);
             StartCommand.Subscribe(this.OnStartButtonClicked).AddTo(_disposables);
@@ -46,6 +48,7 @@ namespace HttpServerWPF
             _server = server;
             _logger = log4NetAdapter;
             _logFileWatcher = logFileWatcher;
+            _configService = configService;
 
             // 通信履歴ファイルの監視を開始
             _logFileWatcher.FileChanged += OnLogFileChanged;
@@ -55,7 +58,7 @@ namespace HttpServerWPF
         {
             try
             {
-                ConfigData configData = ConfigManager.GetConfigData();
+                var configData = _configService.Load();
                 this.HostName.Value = configData.Host;
                 this.PortNo.Value = int.Parse(configData.Port);
                 this.Path.Value = configData.Path;
@@ -95,7 +98,7 @@ namespace HttpServerWPF
                     User = this.User.Value,
                     Password = this.Password.Value
                 };
-                ConfigManager.SaveConfigData(configData);
+                _configService.Save(configData);
 
                 StatusMessage.Value = "設定を保存しました。";
             }

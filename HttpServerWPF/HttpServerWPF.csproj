@@ -15,11 +15,18 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ConfigService\ConfigService.csproj" />
     <ProjectReference Include="..\HttpServerService\HttpServerService.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="logs\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="external_setting_file.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

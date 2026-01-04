@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Text;
+using ConfigService;
 using LoggerService;
 
 namespace HttpServerService
@@ -11,11 +12,14 @@ namespace HttpServerService
         private bool _isStopping;
 
         private readonly ILog4netAdapter _logger;
+        private readonly IConfigService _configService;
 
         /// <summary> コンストラクタ </summary>
-        public Server() { }
-
-        public Server(ILog4netAdapter log4NetAdapter) => _logger = log4NetAdapter;
+        public Server(ILog4netAdapter log4NetAdapter, IConfigService configService)
+        {
+            _logger = log4NetAdapter;
+            _configService = configService;
+        }
 
         /// <summary> APIサービスを起動する </summary>
         public void Start()
@@ -31,7 +35,7 @@ namespace HttpServerService
 
                     _isStopping = false;
 
-                    ConfigData config = ConfigManager.GetConfigData();
+                    var config = _configService.Load();
 
                     _listener = new HttpListener();
 
@@ -128,7 +132,7 @@ namespace HttpServerService
                 HttpListenerContext context = listener.EndGetContext(result);
                 HttpListenerRequest httpListenerRequest = context.Request;
 
-                ConfigData config = ConfigManager.GetConfigData();
+                var config = _configService.Load();
                 if (config.AuthenticationMethod.Equals("Basic"))
                 {
                     bool ok = TryValidateBasicAuth(httpListenerRequest, config.User, config.Password);
@@ -213,8 +217,6 @@ namespace HttpServerService
                 return Encoding.UTF8.GetBytes("{\"error\":\"response.json file not found.\"}");
             }
         }
-
-
 
         private bool TryValidateBasicAuth(HttpListenerRequest request, string expectedUser, string expectedPassword)
         {
