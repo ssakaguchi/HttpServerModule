@@ -31,30 +31,21 @@ namespace HttpServerWPF
         public ReactiveCommand StopCommand { get; } = new ReactiveCommand();
         public ReactiveCommand ClearMessageCommand { get; } = new ReactiveCommand();
 
-        private static class CommunicationLog
-        {
-            public const string Directory = @"logs";
-            public const string FilePath = @"Communication.log";
-        }
-
         private readonly CompositeDisposable _disposables = new();
-
         private readonly IServer _server;
-
-        private readonly ILog4netAdapter _logger =
-            Log4netAdapterFactory.Create(logDirectoryName: CommunicationLog.Directory, logFileName: CommunicationLog.FilePath);
-
+        private readonly ILog4netAdapter _logger;
         private readonly ILogFileWatcher _logFileWatcher;
 
-        public MainWindowViewModel(IServer server, ILogFileWatcher logFileWatcher)
+        public MainWindowViewModel(IServer server,ILog4netAdapter log4NetAdapter, ILogFileWatcher logFileWatcher)
         {
             SaveCommand.Subscribe(this.OnSaveButtonClicked).AddTo(_disposables);
             StartCommand.Subscribe(this.OnStartButtonClicked).AddTo(_disposables);
             StopCommand.Subscribe(this.OnStopButtonClicked).AddTo(_disposables);
             LoadedCommand.Subscribe(this.OnLoaded).AddTo(_disposables);
             ClearMessageCommand.Subscribe(this.ClearMessage).AddTo(_disposables);
-            this._server = server;
-            this._logFileWatcher = logFileWatcher;
+            _server = server;
+            _logger = log4NetAdapter;
+            _logFileWatcher = logFileWatcher;
 
             // 通信履歴ファイルの監視を開始
             _logFileWatcher.FileChanged += OnLogFileChanged;

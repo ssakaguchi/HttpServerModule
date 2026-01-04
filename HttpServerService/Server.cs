@@ -4,25 +4,18 @@ using LoggerService;
 
 namespace HttpServerService
 {
-    public class Server: IServer
+    public class Server : IServer
     {
         private HttpListener _listener = new HttpListener();
         private readonly object _sync = new();
         private bool _isStopping;
 
-        private static class CommunicationLog
-        {
-            public const string Directory = @"logs";
-            public const string FilePath = @"Communication.log";
-        }
-
-        private readonly ILog4netAdapter _logger =
-            Log4netAdapterFactory.Create(logDirectoryName: CommunicationLog.Directory, logFileName: CommunicationLog.FilePath);
+        private readonly ILog4netAdapter _logger;
 
         /// <summary> コンストラクタ </summary>
-        public Server()
-        {
-        }
+        public Server() { }
+
+        public Server(ILog4netAdapter log4NetAdapter) => _logger = log4NetAdapter;
 
         /// <summary> APIサービスを起動する </summary>
         public void Start()

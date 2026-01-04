@@ -6,26 +6,16 @@ using log4net.Repository.Hierarchy;
 
 namespace LoggerService
 {
-    internal sealed class Log4netAdapter : ILog4netAdapter
+    public sealed class Log4netAdapter : ILog4netAdapter
     {
         private ILog Logger { get; } = LogManager.GetLogger(typeof(Log4netAdapter));
 
-        private static Log4netAdapter? _instance;
-
-        /// <summary>インスタンス</summary>
-        public static Log4netAdapter Instance
+        public Log4netAdapter(LoggerOptions options)
         {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new Log4netAdapter();
-                }
-                return _instance;
-            }
+            Initialize(options.LogDirectoryName, options.LogFileName);
         }
 
-        private Log4netAdapter()
+        public Log4netAdapter()
         {
         }
 
@@ -77,15 +67,6 @@ namespace LoggerService
         public void Error(string message) => Logger.Error(message);
 
         public void Error(string message, Exception ex) => Logger.Error(message, ex);
-    }
-
-    public static class Log4netAdapterFactory
-    {
-        public static ILog4netAdapter Create(string logDirectoryName, string logFileName)
-        {
-            Log4netAdapter.Initialize(logDirectoryName, logFileName);
-            return Log4netAdapter.Instance;
-        }
     }
 
     public interface ILog4netAdapter

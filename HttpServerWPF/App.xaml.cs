@@ -24,7 +24,7 @@ namespace HttpServerWPF
 
             containerRegistry.RegisterSingleton<IServer, Server>();
             containerRegistry.RegisterSingleton<ILogFileWatcher, LogFileWatcher>();
-
+            containerRegistry.RegisterSingleton<ILog4netAdapter, Log4netAdapter>();
         }
     }
 }
