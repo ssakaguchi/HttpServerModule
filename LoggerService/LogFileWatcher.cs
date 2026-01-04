@@ -2,7 +2,7 @@
 
 namespace LoggerService
 {
-    internal sealed class LogFileWatcher : IDisposable, ILogFileWatcher
+    public sealed class LogFileWatcher : IDisposable, ILogFileWatcher
     {
         public event EventHandler<string>? FileChanged;
 
@@ -31,6 +31,12 @@ namespace LoggerService
             _fileWatcher.Created += OnFileChanged;
             _fileWatcher.Changed += OnFileChanged;
         }
+
+        public LogFileWatcher(LoggerOptions options) : this(options.LogDirectoryName, options.LogFileName)
+        {
+        }
+
+        public LogFileWatcher() { }
 
         public void Start() => _fileWatcher.EnableRaisingEvents = true;          // 監視を開始
         public void Stop() => _fileWatcher.EnableRaisingEvents = false;          // 監視を停止
