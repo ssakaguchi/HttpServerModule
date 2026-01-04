@@ -10,16 +10,7 @@ namespace LoggerService
     {
         private ILog Logger { get; } = LogManager.GetLogger(typeof(Log4netAdapter));
 
-        public Log4netAdapter(LoggerOptions options)
-        {
-            Initialize(options.LogDirectoryName, options.LogFileName);
-        }
-
-        public Log4netAdapter()
-        {
-        }
-
-        internal static void Initialize(string logDirectoryName, string logFileName)
+        public Log4netAdapter(string logDirectoryName, string logFileName)
         {
             var hierarchy = (Hierarchy)LogManager.GetRepository();
 

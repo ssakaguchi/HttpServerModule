@@ -32,12 +32,6 @@ namespace LoggerService
             _fileWatcher.Changed += OnFileChanged;
         }
 
-        public LogFileWatcher(LoggerOptions options) : this(options.LogDirectoryName, options.LogFileName)
-        {
-        }
-
-        public LogFileWatcher() { }
-
         public void Start() => _fileWatcher.EnableRaisingEvents = true;          // 監視を開始
         public void Stop() => _fileWatcher.EnableRaisingEvents = false;          // 監視を停止
 
