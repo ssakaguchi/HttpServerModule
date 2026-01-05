@@ -91,13 +91,6 @@ namespace LoggerService
         }
     }
 
-
-    public static class LogFileWatcherFactory
-    {
-        public static ILogFileWatcher Create(string logDirectoryName, string logFileName) => new LogFileWatcher(logDirectoryName, logFileName);
-    }
-
-
     public interface ILogFileWatcher
     {
         public event EventHandler<string>? FileChanged;
