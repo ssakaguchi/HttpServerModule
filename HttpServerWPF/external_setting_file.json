@@ -2,7 +2,7 @@
   "host_name": "localhost",
   "port_no": 8080,
   "path": "api/v1/resource",
-  "authentication_method": "Digest",
+  "authentication_method": "Basic",
   "user": "user",
   "password": "pass"
 }
