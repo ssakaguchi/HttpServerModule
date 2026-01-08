@@ -44,7 +44,7 @@ namespace HttpServerService
                     {
                         _listener.AuthenticationSchemes = AuthenticationSchemes.Basic;
 
-                        _logger.Info("  認証方法：Basic認証");
+                        _logger.Info($"  認証方法：Basic認証");
                         _logger.Info($"  アカウント認証 ");
                         _logger.Info($"    ユーザー名：{config.User}");
                         _logger.Info($"    パスワード：{config.Password}");
@@ -56,10 +56,18 @@ namespace HttpServerService
                     }
 
                     // uriPrefixの設定
-                    string uriPrefix = $"http://{config.Host}:{config.Port}/{config.Path}/";
-                    _logger.Info($"  URI：{uriPrefix}");
+                    UriBuilder uriBuilder = new()
+                    {
+                        Scheme = "http",
+                        Host = config.Host,
+                        Port = int.Parse(config.Port),
+                        Path = config.Path.TrimStart('/').TrimEnd('/') + "/"
+                    };
 
-                    _listener.Prefixes.Add(uriPrefix);
+
+                    _logger.Info($"  URI：{uriBuilder.Uri}");
+
+                    _listener.Prefixes.Add(uriBuilder.Uri.ToString());
 
                     // HTTPサーバーを起動する
                     _listener.Start();
@@ -218,6 +226,7 @@ namespace HttpServerService
             }
         }
 
+        /// <summary> Basic認証の検証を行う </summary>
         private bool TryValidateBasicAuth(HttpListenerRequest request, string expectedUser, string expectedPassword)
         {
             // Authorization: Basic base64(user:pass)
@@ -251,6 +260,7 @@ namespace HttpServerService
             }
         }
 
+        /// <summary> Unauthorizedレスポンスを書き込む </summary>
         private async Task WriteUnauthorizedAsync(HttpListenerResponse response, string realm)
         {
             response.StatusCode = (int)HttpStatusCode.Unauthorized;
