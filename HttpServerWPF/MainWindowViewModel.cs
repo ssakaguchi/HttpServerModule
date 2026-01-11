@@ -1,4 +1,5 @@
-﻿using ConfigService;
+﻿using System.Reactive.Linq;
+using ConfigService;
 using HttpServerService;
 using LoggerService;
 using Reactive.Bindings;
@@ -32,6 +33,13 @@ namespace HttpServerWPF
         public ReactiveCommand StopCommand { get; } = new ReactiveCommand();
         public ReactiveCommand ClearMessageCommand { get; } = new ReactiveCommand();
 
+        public ReactiveProperty<bool> IsUserEnabled { get; } = new ReactiveProperty<bool>(true);
+        public ReactiveProperty<bool> IsPasswordEnabled { get; } = new ReactiveProperty<bool>(true);
+
+        public ReactiveProperty<bool> SaveCommandEnabled { get; } = new ReactiveProperty<bool>(true);
+        public ReactiveProperty<bool> StartCommandEnabled { get; } = new ReactiveProperty<bool>(true);
+        public ReactiveProperty<bool> StopCommandEnabled { get; } = new ReactiveProperty<bool>(true);
+
         private readonly CompositeDisposable _disposables = new();
         private readonly IServer _server;
         private readonly ILog4netAdapter _logger;
@@ -45,6 +53,16 @@ namespace HttpServerWPF
             StopCommand.Subscribe(this.OnStopButtonClicked).AddTo(_disposables);
             LoadedCommand.Subscribe(this.OnLoaded).AddTo(_disposables);
             ClearMessageCommand.Subscribe(this.ClearMessage).AddTo(_disposables);
+
+
+            UseHttps.Skip(1).Subscribe(x => { this.UpdateEnabled(); }).AddTo(_disposables);
+            HostName.Skip(1).Subscribe(x => { this.UpdateEnabled(); }).AddTo(_disposables);
+            PortNo.Skip(1).Subscribe(x => { this.UpdateEnabled(); }).AddTo(_disposables);
+            Path.Skip(1).Subscribe(x => { this.UpdateEnabled(); }).AddTo(_disposables);
+            AuthenticationMethod.Skip(1).Subscribe(x => { this.UpdateEnabled(); }).AddTo(_disposables);
+            User.Skip(1).Subscribe(x => { this.UpdateEnabled(); }).AddTo(_disposables);
+            Password.Skip(1).Subscribe(x => { this.UpdateEnabled(); }).AddTo(_disposables);
+
             _server = server;
             _logger = log4NetAdapter;
             _logFileWatcher = logFileWatcher;
@@ -78,6 +96,7 @@ namespace HttpServerWPF
 
                 this.LogText.Value = await _logFileWatcher.ReadLogFileContentAsync();
 
+                this.UpdateEnabled();
             }
             catch (Exception e)
             {
@@ -90,16 +109,7 @@ namespace HttpServerWPF
         {
             try
             {
-                var configData = new ConfigData
-                {
-                    Scheme = this.UseHttps.Value ? "https" : "http",
-                    Host = this.HostName.Value,
-                    Port = this.PortNo.Value.ToString(),
-                    Path = this.Path.Value,
-                    AuthenticationMethod = this.AuthenticationMethod.Value.ToString(),
-                    User = this.User.Value,
-                    Password = this.Password.Value
-                };
+                ConfigData configData = this.CreateInputConfigData();
                 _configService.Save(configData);
 
                 StatusMessage.Value = "設定を保存しました。";
@@ -109,6 +119,20 @@ namespace HttpServerWPF
                 _logger.Error("設定の保存に失敗しました。", e);
                 StatusMessage.Value = "設定の保存に失敗しました。";
             }
+        }
+
+        private ConfigData CreateInputConfigData()
+        {
+            return new ConfigData
+            {
+                Scheme = this.UseHttps.Value ? "https" : "http",
+                Host = this.HostName.Value,
+                Port = this.PortNo.Value.ToString(),
+                Path = this.Path.Value,
+                AuthenticationMethod = this.AuthenticationMethod.Value.ToString(),
+                User = this.User.Value,
+                Password = this.Password.Value
+            };
         }
 
         private void OnStartButtonClicked()
@@ -124,6 +148,19 @@ namespace HttpServerWPF
         }
 
         private void OnLogFileChanged(object? sender, string content) => LogText.Value = content;
+
+        private void UpdateEnabled()
+        {
+            ConfigData configData = this.CreateInputConfigData();
+            bool existsDifference = _configService.ExistsConfigDifference(configData);
+            SaveCommandEnabled.Value = existsDifference;
+            StartCommandEnabled.Value = !existsDifference;
+            StopCommandEnabled.Value = !existsDifference;
+
+            IsUserEnabled.Value = AuthenticationMethod.Value == AuthenticationMethodType.Basic;
+            IsPasswordEnabled.Value = AuthenticationMethod.Value == AuthenticationMethodType.Basic;
+        }
+
 
         private void ClearMessage() => StatusMessage.Value = string.Empty;
 

@@ -4,15 +4,13 @@ namespace ConfigService
 {
     public class ConfigManager : IConfigService
     {
-        private static ConfigData? _configData;
+        private static ConfigData _configData = new();
         private readonly string _filePath;
 
         public ConfigManager(string filePath) => _filePath = filePath;
 
         public ConfigData Load()
         {
-            if (_configData != null) return _configData;
-
             if (!File.Exists(_filePath))
             {
                 throw new FileNotFoundException("設定ファイルが見つかりません。", _filePath);
@@ -30,10 +28,13 @@ namespace ConfigService
             File.WriteAllText(_filePath, jsonText);
             _configData = configData;
         }
+
+        /// <summary> 設定に差分があるかどうか </summary>
+        public bool ExistsConfigDifference(ConfigData configData) => !_configData.Equals(configData);
     }
 
 
-    public class ConfigData
+    public class ConfigData : IEquatable<ConfigData>
     {
         [JsonProperty("scheme")]
         public string Scheme { get; set; } = "http";
@@ -56,5 +57,44 @@ namespace ConfigService
         [JsonProperty("password")]
         public string Password { get; set; } = string.Empty;
 
+        /// <summary> 等値比較 </summary>
+        public bool Equals(ConfigData? other)
+        {
+            if (other is null) return false;
+
+            return Scheme == other.Scheme &&
+                    Host == other.Host &&
+                    Port == other.Port &&
+                    Path == other.Path &&
+                    AuthenticationMethod == other.AuthenticationMethod &&
+                    User == other.User &&
+                    Password == other.Password;
+        }
+
+        /// <summary> 等値比較 </summary>
+        public override bool Equals(object? obj)
+            => Equals(obj as ConfigData);
+
+        /// <summary> ハッシュコード取得 </summary>
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(
+                Scheme,
+                Host,
+                Port,
+                Path,
+                AuthenticationMethod,
+                User,
+                Password
+            );
+        }
+
+        /// <summary> 等値比較演算子 </summary>
+        public static bool operator ==(ConfigData left, ConfigData right)
+            => Equals(left, right);
+
+        /// <summary> 非等値比較演算子 </summary>
+        public static bool operator !=(ConfigData left, ConfigData right)
+            => !Equals(left, right);
     }
 }
