@@ -58,7 +58,7 @@ namespace HttpServerService
                     // uriPrefixの設定
                     UriBuilder uriBuilder = new()
                     {
-                        Scheme = "http",
+                        Scheme = config.Scheme,
                         Host = config.Host,
                         Port = int.Parse(config.Port),
                         Path = config.Path.TrimStart('/').TrimEnd('/') + "/"

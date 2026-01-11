@@ -35,6 +35,9 @@ namespace ConfigService
 
     public class ConfigData
     {
+        [JsonProperty("scheme")]
+        public string Scheme { get; set; } = "http";
+
         [JsonProperty("host_name")]
         public string Host { get; set; } = string.Empty;
 

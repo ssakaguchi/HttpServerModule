@@ -15,6 +15,7 @@ namespace HttpServerWPF
             Anonymous,
         }
 
+        public ReactiveProperty<bool> UseHttps { get; } = new ReactiveProperty<bool>(false);
         public ReactiveProperty<string> HostName { get; } = new ReactiveProperty<string>(string.Empty);
         public ReactiveProperty<int> PortNo { get; } = new ReactiveProperty<int>(0);
         public ReactiveProperty<string> Path { get; } = new ReactiveProperty<string>(string.Empty);
@@ -37,7 +38,7 @@ namespace HttpServerWPF
         private readonly ILogFileWatcher _logFileWatcher;
         private readonly IConfigService _configService;
 
-        public MainWindowViewModel(IServer server,ILog4netAdapter log4NetAdapter, ILogFileWatcher logFileWatcher, IConfigService configService)
+        public MainWindowViewModel(IServer server, ILog4netAdapter log4NetAdapter, ILogFileWatcher logFileWatcher, IConfigService configService)
         {
             SaveCommand.Subscribe(this.OnSaveButtonClicked).AddTo(_disposables);
             StartCommand.Subscribe(this.OnStartButtonClicked).AddTo(_disposables);
@@ -58,6 +59,7 @@ namespace HttpServerWPF
             try
             {
                 var configData = _configService.Load();
+                this.UseHttps.Value = configData.Scheme == "https" ? true : false;
                 this.HostName.Value = configData.Host;
                 this.PortNo.Value = int.Parse(configData.Port);
                 this.Path.Value = configData.Path;
@@ -90,6 +92,7 @@ namespace HttpServerWPF
             {
                 var configData = new ConfigData
                 {
+                    Scheme = this.UseHttps.Value ? "https" : "http",
                     Host = this.HostName.Value,
                     Port = this.PortNo.Value.ToString(),
                     Path = this.Path.Value,
@@ -110,9 +113,9 @@ namespace HttpServerWPF
 
         private void OnStartButtonClicked()
         {
-            _logger.Info("サーバーを開始します");
-            _server.Start();
-        }
+                _logger.Info("サーバーを開始します");
+                _server.Start();
+            }
 
         private void OnStopButtonClicked()
         {
