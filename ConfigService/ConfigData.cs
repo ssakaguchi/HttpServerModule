@@ -25,6 +25,9 @@ namespace ConfigService
         [JsonProperty("password")]
         public string Password { get; set; } = string.Empty;
 
+        [JsonProperty("upload_directory_path")]
+        public string UploadDirectoryPath { get; set; } = string.Empty;
+
         /// <summary> 等値比較 </summary>
         public bool Equals(ConfigData? other)
         {
@@ -36,7 +39,8 @@ namespace ConfigService
                     Path == other.Path &&
                     AuthenticationMethod == other.AuthenticationMethod &&
                     User == other.User &&
-                    Password == other.Password;
+                    Password == other.Password && 
+                    UploadDirectoryPath == other.UploadDirectoryPath;
         }
 
         /// <summary> 等値比較 </summary>
@@ -53,7 +57,8 @@ namespace ConfigService
                 Path,
                 AuthenticationMethod,
                 User,
-                Password
+                Password,
+                UploadDirectoryPath
             );
         }
 

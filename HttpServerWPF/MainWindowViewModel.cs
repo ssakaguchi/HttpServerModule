@@ -1,6 +1,7 @@
 ﻿using System.Reactive.Linq;
 using ConfigService;
 using HttpServerService;
+using HttpServerWPF.FileDialogService;
 using LoggerService;
 using Reactive.Bindings;
 using Reactive.Bindings.Disposables;
@@ -24,6 +25,7 @@ namespace HttpServerWPF
 
         public ReactiveProperty<string> User { get; } = new ReactiveProperty<string>(string.Empty);
         public ReactiveProperty<string> Password { get; } = new ReactiveProperty<string>(string.Empty);
+        public ReactiveProperty<string> UploadDirectoryPath { get; } = new ReactiveProperty<string>(string.Empty);
         public ReactiveProperty<string> LogText { get; } = new ReactiveProperty<string>(string.Empty);
         public ReactiveProperty<string> StatusMessage { get; } = new ReactiveProperty<string>(string.Empty);
 
@@ -31,6 +33,7 @@ namespace HttpServerWPF
         public ReactiveCommand SaveCommand { get; } = new ReactiveCommand();
         public ReactiveCommand StartCommand { get; } = new ReactiveCommand();
         public ReactiveCommand StopCommand { get; } = new ReactiveCommand();
+        public ReactiveCommand UploadDirectorySelectCommand { get; } = new ReactiveCommand();
         public ReactiveCommand ClearMessageCommand { get; } = new ReactiveCommand();
 
         public ReactiveProperty<bool> IsUserEnabled { get; } = new ReactiveProperty<bool>(true);
@@ -45,9 +48,15 @@ namespace HttpServerWPF
         private readonly ILog4netAdapter _logger;
         private readonly ILogFileWatcher _logFileWatcher;
         private readonly IConfigService _configService;
+        private readonly IOpenFolderDialogService _openFileDialogService;
 
-        public MainWindowViewModel(IServer server, ILog4netAdapter log4NetAdapter, ILogFileWatcher logFileWatcher, IConfigService configService)
+        public MainWindowViewModel(IServer server,
+                                   ILog4netAdapter log4NetAdapter,
+                                   ILogFileWatcher logFileWatcher,
+                                   IConfigService configService,
+                                   IOpenFolderDialogService openFileDialogService)
         {
+            UploadDirectorySelectCommand.Subscribe(this.OnUploadDirectorySelectButtonClicked).AddTo(_disposables);
             SaveCommand.Subscribe(this.OnSaveButtonClicked).AddTo(_disposables);
             StartCommand.Subscribe(this.OnStartButtonClicked).AddTo(_disposables);
             StopCommand.Subscribe(this.OnStopButtonClicked).AddTo(_disposables);
@@ -62,11 +71,13 @@ namespace HttpServerWPF
             AuthenticationMethod.Skip(1).Subscribe(x => { this.UpdateEnabled(); }).AddTo(_disposables);
             User.Skip(1).Subscribe(x => { this.UpdateEnabled(); }).AddTo(_disposables);
             Password.Skip(1).Subscribe(x => { this.UpdateEnabled(); }).AddTo(_disposables);
+            UploadDirectoryPath.Skip(1).Subscribe(x => { this.UpdateEnabled(); }).AddTo(_disposables);
 
             _server = server;
             _logger = log4NetAdapter;
             _logFileWatcher = logFileWatcher;
             _configService = configService;
+            _openFileDialogService = openFileDialogService;
 
             // 通信履歴ファイルの監視を開始
             _logFileWatcher.FileChanged += OnLogFileChanged;
@@ -82,6 +93,7 @@ namespace HttpServerWPF
                 this.PortNo.Value = int.Parse(configData.Port);
                 this.Path.Value = configData.Path;
                 this.User.Value = configData.User;
+                this.UploadDirectoryPath.Value = configData.UploadDirectoryPath;
 
                 // 未設定や不正値は Basic を設定する
                 if (Enum.TryParse<AuthenticationMethodType>(configData.AuthenticationMethod, ignoreCase: true, out var method))
@@ -102,6 +114,26 @@ namespace HttpServerWPF
             {
                 _logger.Error("Loadに失敗しました。", e);
                 StatusMessage.Value = "Loadに失敗しました。";
+            }
+        }
+
+        private void OnUploadDirectorySelectButtonClicked()
+        {
+            try
+            {
+                _openFileDialogService.Title = "アップロードファイル保存先の選択";
+
+                bool? result = _openFileDialogService.OpenFolderDialog();
+                if (result == true)
+                {
+                    this.UploadDirectoryPath.Value = _openFileDialogService.FolderName;
+                }
+
+            }
+            catch (Exception e)
+            {
+                _logger.Error("アップロードファイル保存先の選択に失敗しました。", e);
+                StatusMessage.Value = "アップロードファイル保存先の選択に失敗しました。";
             }
         }
 
@@ -133,15 +165,16 @@ namespace HttpServerWPF
                 Path = this.Path.Value,
                 AuthenticationMethod = this.AuthenticationMethod.Value.ToString(),
                 User = this.User.Value,
-                Password = this.Password.Value
+                Password = this.Password.Value,
+                UploadDirectoryPath = this.UploadDirectoryPath.Value,
             };
         }
 
         private void OnStartButtonClicked()
         {
-                _logger.Info("サーバーを開始します");
-                _server.Start();
-            }
+            _logger.Info("サーバーを開始します");
+            _server.Start();
+        }
 
         private void OnStopButtonClicked()
         {

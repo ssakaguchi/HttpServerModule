@@ -11,7 +11,7 @@
         mc:Ignorable="d"
         Background="LightYellow"
         Loaded= "Window_Loaded"
-        Title="HttpServer" Height="400" Width="825" ResizeMode="NoResize">
+        Title="HttpServer" Height="475" Width="825" ResizeMode="NoResize">
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Loaded">
             <i:InvokeCommandAction Command="{Binding LoadedCommand}"/>
@@ -67,6 +67,12 @@
                         <TextBlock Text="Password:" FontSize="16" Width="80" Margin="0,5,0,0" />
                         <TextBox Text="{Binding Password.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsPasswordEnabled.Value}" FontSize="16" Margin="10,5,0,0" Width="140"/>
                     </StackPanel>
+                </StackPanel>
+            </GroupBox>
+            <GroupBox Margin="10,0,10,0" Header="Upload Directory" FontSize="20">
+                <StackPanel Orientation="Horizontal">
+                    <TextBox Text="{Binding UploadDirectoryPath.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" FontSize="16" Margin="5,5,0,0" Width="160" Height="30"/>
+                    <Button Content="Select" Command="{Binding UploadDirectorySelectCommand}" FontSize="16" Margin="5,5,0,0" Height="30" Width="60" HorizontalAlignment="Right" />
                 </StackPanel>
             </GroupBox>
         </StackPanel>
