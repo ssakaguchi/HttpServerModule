@@ -1,6 +1,7 @@
 ﻿using System.Reactive.Linq;
 using ConfigService;
 using HttpServerService;
+using HttpServerWPF.ConfigMapper;
 using HttpServerWPF.FileDialogService;
 using LoggerService;
 using Reactive.Bindings;
@@ -49,12 +50,14 @@ namespace HttpServerWPF
         private readonly ILogFileWatcher _logFileWatcher;
         private readonly IConfigService _configService;
         private readonly IOpenFolderDialogService _openFileDialogService;
+        private readonly IConfigMapper _configMapper;
 
         public MainWindowViewModel(IServer server,
                                    ILoggerService log4NetAdapter,
                                    ILogFileWatcher logFileWatcher,
                                    IConfigService configService,
-                                   IOpenFolderDialogService openFileDialogService)
+                                   IOpenFolderDialogService openFileDialogService,
+                                   IConfigMapper configMapper)
         {
             UploadDirectorySelectCommand.Subscribe(this.OnUploadDirectorySelectButtonClicked).AddTo(_disposables);
             SaveCommand.Subscribe(this.OnSaveButtonClicked).AddTo(_disposables);
@@ -78,6 +81,7 @@ namespace HttpServerWPF
             _logFileWatcher = logFileWatcher;
             _configService = configService;
             _openFileDialogService = openFileDialogService;
+            _configMapper = configMapper;
 
             // 通信履歴ファイルの監視を開始
             _logFileWatcher.FileChanged += OnLogFileChanged;
@@ -87,24 +91,8 @@ namespace HttpServerWPF
         {
             try
             {
-                var configData = _configService.Load();
-                this.UseHttps.Value = configData.Scheme == "https" ? true : false;
-                this.HostName.Value = configData.Host;
-                this.PortNo.Value = int.Parse(configData.Port);
-                this.Path.Value = configData.Path;
-                this.User.Value = configData.User;
-                this.UploadDirectoryPath.Value = configData.UploadDirectoryPath;
-
-                // 未設定や不正値は Basic を設定する
-                if (Enum.TryParse<AuthenticationMethodType>(configData.AuthenticationMethod, ignoreCase: true, out var method))
-                {
-                    AuthenticationMethod.Value = method;
-                }
-                else
-                {
-                    AuthenticationMethod.Value = AuthenticationMethodType.Basic;
-                }
-                this.Password.Value = configData.Password;
+                var config = _configService.Load();
+                _configMapper.ApplyTo(this, config);
 
                 this.LogText.Value = await _logFileWatcher.ReadLogFileContentAsync();
 
@@ -141,8 +129,8 @@ namespace HttpServerWPF
         {
             try
             {
-                ConfigData configData = this.CreateInputConfigData();
-                _configService.Save(configData);
+                var config = _configMapper.CreateFrom(this);
+                _configService.Save(config);
 
                 this.UpdateEnabled();
 
@@ -153,21 +141,6 @@ namespace HttpServerWPF
                 _logger.Error("設定の保存に失敗しました。", e);
                 StatusMessage.Value = "設定の保存に失敗しました。";
             }
-        }
-
-        private ConfigData CreateInputConfigData()
-        {
-            return new ConfigData
-            {
-                Scheme = this.UseHttps.Value ? "https" : "http",
-                Host = this.HostName.Value,
-                Port = this.PortNo.Value.ToString(),
-                Path = this.Path.Value,
-                AuthenticationMethod = this.AuthenticationMethod.Value.ToString(),
-                User = this.User.Value,
-                Password = this.Password.Value,
-                UploadDirectoryPath = this.UploadDirectoryPath.Value,
-            };
         }
 
         private void OnStartButtonClicked()
@@ -186,8 +159,8 @@ namespace HttpServerWPF
 
         private void UpdateEnabled()
         {
-            ConfigData configData = this.CreateInputConfigData();
-            bool existsDifference = _configService.ExistsConfigDifference(configData);
+            var config = _configMapper.CreateFrom(this);
+            bool existsDifference = _configService.ExistsConfigDifference(config);
             SaveCommandEnabled.Value = existsDifference;
             StartCommandEnabled.Value = !existsDifference;
             StopCommandEnabled.Value = !existsDifference;

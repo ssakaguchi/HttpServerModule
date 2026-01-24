@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using ConfigService;
 using HttpServerService;
+using HttpServerWPF.ConfigMapper;
 using HttpServerWPF.FileDialogService;
 using LoggerService;
 
@@ -22,6 +23,7 @@ namespace HttpServerWPF
                 (() => new Log4netAdapter(logDirectoryName: @"logs", logFileName: @"Communication.log"));
             containerRegistry.RegisterSingleton<IConfigService>(() => new ConfigManager(filePath: @"external_setting_file.json"));
             containerRegistry.Register<IOpenFolderDialogService, FileDialogService.OpenFolderDialogService>();
+            containerRegistry.Register<IConfigMapper, ConfigMapper.ConfigMapper>();
         }
     }
 }
