@@ -18,7 +18,7 @@ namespace HttpServerWPF
             containerRegistry.RegisterSingleton<IServer, Server>();
             containerRegistry.RegisterSingleton<ILogFileWatcher>
                 (() => new LogFileWatcher(logDirectoryName: @"logs", logFileName: @"Communication.log"));
-            containerRegistry.RegisterSingleton<ILog4netAdapter>
+            containerRegistry.RegisterSingleton<ILoggerService>
                 (() => new Log4netAdapter(logDirectoryName: @"logs", logFileName: @"Communication.log"));
             containerRegistry.RegisterSingleton<IConfigService>(() => new ConfigManager(filePath: @"external_setting_file.json"));
             containerRegistry.Register<IOpenFolderDialogService, FileDialogService.OpenFolderDialogService>();

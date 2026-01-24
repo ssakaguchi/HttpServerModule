@@ -45,13 +45,13 @@ namespace HttpServerWPF
 
         private readonly CompositeDisposable _disposables = new();
         private readonly IServer _server;
-        private readonly ILog4netAdapter _logger;
+        private readonly ILoggerService _logger;
         private readonly ILogFileWatcher _logFileWatcher;
         private readonly IConfigService _configService;
         private readonly IOpenFolderDialogService _openFileDialogService;
 
         public MainWindowViewModel(IServer server,
-                                   ILog4netAdapter log4NetAdapter,
+                                   ILoggerService log4NetAdapter,
                                    ILogFileWatcher logFileWatcher,
                                    IConfigService configService,
                                    IOpenFolderDialogService openFileDialogService)

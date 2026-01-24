@@ -6,7 +6,7 @@ using log4net.Repository.Hierarchy;
 
 namespace LoggerService
 {
-    public sealed class Log4netAdapter : ILog4netAdapter
+    public sealed class Log4netAdapter : ILoggerService
     {
         private ILog Logger { get; } = LogManager.GetLogger(typeof(Log4netAdapter));
 
@@ -60,7 +60,7 @@ namespace LoggerService
         public void Error(string message, Exception ex) => Logger.Error(message, ex);
     }
 
-    public interface ILog4netAdapter
+    public interface ILoggerService
     {
         public void Info(string message);
 

@@ -11,11 +11,11 @@ namespace HttpServerService
         private readonly object _sync = new();
         private bool _isStopping;
 
-        private readonly ILog4netAdapter _logger;
+        private readonly ILoggerService _logger;
         private readonly IConfigService _configService;
 
         /// <summary> コンストラクタ </summary>
-        public Server(ILog4netAdapter log4NetAdapter, IConfigService configService)
+        public Server(ILoggerService log4NetAdapter, IConfigService configService)
         {
             _logger = log4NetAdapter;
             _configService = configService;
