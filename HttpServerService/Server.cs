@@ -283,7 +283,7 @@ namespace HttpServerService
         }
 
         /// <summary> アップロードファイルを保存する </summary>
-        private static async Task SaveUploadFile(HttpListenerContext context, ConfigData config, string body)
+        private async Task SaveUploadFile(HttpListenerContext context, ConfigData config, string body)
         {
             // 受信したJsonファイルを保存する
             if (context.Request.Url == null || context.Request.Url.Segments == null || context.Request.Url.Segments.Length == 0) { return; }
@@ -305,6 +305,8 @@ namespace HttpServerService
 
             // 保存
             await File.WriteAllTextAsync(filePath, body, Encoding.UTF8);
+
+            _logger.Info($"アップロードファイルを保存しました");
         }
     }
 }
