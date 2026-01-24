@@ -6,6 +6,7 @@
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:HttpServerWPF"
+        xmlns:converter="clr-namespace:HttpServerWPF.Converter"
         prism:ViewModelLocator.AutoWireViewModel="True"
         WindowStartupLocation="CenterScreen"
         mc:Ignorable="d"
@@ -21,7 +22,7 @@
         <MouseBinding MouseAction="LeftClick" Command="{Binding ClearMessageCommand}" />
     </Window.InputBindings>
     <Window.Resources>
-        <local:EnumEqualsConverter x:Key="EnumEqualsConverter" />
+        <converter:EnumEqualsConverter x:Key="EnumEqualsConverter" />
     </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
