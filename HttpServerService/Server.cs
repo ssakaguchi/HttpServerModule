@@ -167,12 +167,18 @@ namespace HttpServerService
                 }
 
                 _logger.Info($"  ボディ部:");
+
                 var encoding = context.Request.ContentEncoding ?? Encoding.UTF8;
                 using (var reader = new StreamReader(context.Request.InputStream, encoding))
                 {
                     var body = await reader.ReadToEndAsync();
                     body = string.IsNullOrEmpty(body) ? "なし" : body;
                     _logger.Info($"    {body}");
+
+                    if (httpListenerRequest.HttpMethod == "POST")
+                    {
+                        await SaveUploadFile(context, config, body);
+                    }
                 }
 
                 HttpListenerResponse response = context.Response;
@@ -274,6 +280,31 @@ namespace HttpServerService
             response.ContentLength64 = body.Length;
             await response.OutputStream.WriteAsync(body, 0, body.Length);
             response.OutputStream.Close();
+        }
+
+        /// <summary> アップロードファイルを保存する </summary>
+        private static async Task SaveUploadFile(HttpListenerContext context, ConfigData config, string body)
+        {
+            // 受信したJsonファイルを保存する
+            if (context.Request.Url == null || context.Request.Url.Segments == null || context.Request.Url.Segments.Length == 0) { return; }
+
+            string command = context.Request.Url.Segments[^1].TrimEnd('/');
+            string filename = $"{command}_{DateTime.Now:yyyyMMddHHmmss.fff}.json";
+
+            // 保存フォルダのパスを取得(デフォルトは実行フォルダ)
+            string directory = string.IsNullOrWhiteSpace(config.UploadDirectoryPath)
+                ? Environment.CurrentDirectory
+                : config.UploadDirectoryPath.Trim('/');
+
+            string saveFolder = $"{directory}\\Json";
+
+            // 未作成の場合、保存フォルダを作成する
+            if (!Directory.Exists(saveFolder)) { Directory.CreateDirectory(saveFolder); }
+
+            string filePath = Path.Combine(saveFolder, filename);
+
+            // 保存
+            await File.WriteAllTextAsync(filePath, body, Encoding.UTF8);
         }
     }
 }
