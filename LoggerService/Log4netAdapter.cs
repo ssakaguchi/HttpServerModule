@@ -38,9 +38,8 @@ namespace LoggerService
                 Name = "RollingFileAppender",
                 File = Path.Combine(logDir, logFileName),
                 AppendToFile = true,
-                RollingStyle = RollingFileAppender.RollingMode.Size,
-                MaximumFileSize = "10MB",
-                MaxSizeRollBackups = 3,
+                RollingStyle = RollingFileAppender.RollingMode.Date,
+                DatePattern = "'.'yyyyMMdd",
                 StaticLogFileName = true,
                 LockingModel = new FileAppender.MinimalLock(),
                 Layout = layout
