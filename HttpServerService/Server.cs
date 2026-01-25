@@ -150,7 +150,7 @@ namespace HttpServerService
                         await WriteUnauthorizedAsync(context.Response, realm: "HttpServerService");
                         return true;
                     }
-                    _logger.Error("Basic認証に成功しました。");
+                    _logger.Info("Basic認証に成功しました。");
                 }
 
                 _logger.Info($"要求URI:{httpListenerRequest.Url}");
@@ -306,7 +306,7 @@ namespace HttpServerService
             // 保存
             await File.WriteAllTextAsync(filePath, body, Encoding.UTF8);
 
-            _logger.Info($"アップロードファイルを保存しました");
+            _logger.Info($"アップロードファイルを指定の場所に保存しました");
         }
     }
 }
