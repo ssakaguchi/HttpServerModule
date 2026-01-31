@@ -162,6 +162,9 @@ namespace HttpServerService
                 {
                     if (key == null) continue;
 
+                    // Authorizationヘッダーはログに出力しない
+                    if (key.Equals("Authorization")) continue;
+
                     string value = httpListenerRequest.Headers[key] ?? string.Empty;
                     _logger.Info($"    {key}:{value}");
                 }
