@@ -2,7 +2,7 @@
 
 本プロジェクトは、C# で実装した HTTP/HTTPS 通信の動作検証を目的としたWPF デスクトップアプリケーションのポートフォリオです。
 
-クライアントアプリケーション（HttpClientModule）とサーバーアプリケーション（HttpServerModule）で構成されており、本リポジトリは **クライアントアプリケーション** に該当します。
+クライアントアプリケーション（HttpClientModule）とサーバーアプリケーション（HttpServerModule）で構成されており、本リポジトリは **サーバーアプリケーション** に該当します。
 
 サーバー情報をクライアント／サーバー両アプリケーションの設定として登録した後、
 クライアントアプリケーションからサーバーアプリケーションに対して疎通確認（GET）およびファイルアップロード（POST）を実行できます。
@@ -55,7 +55,7 @@
 
 ## 関連リポジトリ
 
-- [サーバーアプリケーション（HttpServerModule）](https://github.com/ssakaguchi/HttpServerModule)
+- [クライアントーション（HttpClientModule）](https://github.com/ssakaguchi/HttpClientModule)
 
 ## 注意点
 
