@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoggerService", "LoggerServ
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConfigService", "ConfigService\ConfigService.csproj", "{6B307E1D-9E09-4822-9ABB-4C2EB6D4EAF1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MainWindowViewModelTest", "MainWindowViewModelTest\MainWindowViewModelTest.csproj", "{129E29DB-DBA9-4158-9E3B-4647E1B8A79A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{6B307E1D-9E09-4822-9ABB-4C2EB6D4EAF1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6B307E1D-9E09-4822-9ABB-4C2EB6D4EAF1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6B307E1D-9E09-4822-9ABB-4C2EB6D4EAF1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{129E29DB-DBA9-4158-9E3B-4647E1B8A79A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{129E29DB-DBA9-4158-9E3B-4647E1B8A79A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{129E29DB-DBA9-4158-9E3B-4647E1B8A79A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{129E29DB-DBA9-4158-9E3B-4647E1B8A79A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
